@@ -1,0 +1,1 @@
+abaqus job=Cube_PP_SubRTest input=Cube_PP_SubRTest.inp user=../subroutine_export.f
