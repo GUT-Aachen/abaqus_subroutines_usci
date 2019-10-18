@@ -1,5 +1,5 @@
 # Abaqus User Subroutines
-Simulia Abaqus User Subroutines for coupling Abaqus with a third party programm
+Simulia Abaqus User Subroutines for coupling [Simulia Abaqus](https://www.3ds.com/de/produkte-und-services/simulia/produkte/abaqus/) with a third party cfd-solver, in this case [Pace3D](https://www.hs-karlsruhe.de/en/research/hska-research-institutions/institute-for-digital-materials-science-idm/pace-3d-software/).
 
 All user subroutines (USR) are programmed in Fortran95. The given samples and interfaces in the abaqus manual have been transformed from FORTRAN 77 to Fortran 95.
 
