@@ -1,2 +1,2 @@
 # abq_subroutines
-Abaqus Subroutines for Coupling Abaqus with a third party programm
+Simulia Abaqus User Subroutines for coupling Abaqus with a third party programm
