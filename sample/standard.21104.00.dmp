@@ -1,0 +1,27 @@
+<Description>
+    standard.exe / rank 0 / thread 0  encountered a system exception 0xC0000005 (EXCEPTION_ACCESS_VIOLATION)
+
+</Description>
+
+<Callstack>
+(null)
+standardU.dll                  disp                          
+ABQSMAStaCore.dll              elbcv                         
+ABQSMAStaCore.dll              elubc                         
+ABQSMAStaCore.dll              elbco                         
+ABQSMAStaCore.dll              elbco1                        
+ABQSMAStaCore.dll              elgene                        
+ABQSMAStaCore.dll              std_elgen_general             
+ABQSMAStaCore.dll              std_elgen_driver              
+ABQSMAStaCore.dll              execs                         
+ABQSMAStaCore.dll              execproc                      
+ABQSMAStaCore.dll              procdriver                    
+ABQSMAStaCore.dll              substep                       
+ABQSMAStaCore.dll              exec                          
+ABQSMAStaCore.dll              std_main                      
+standard.exe                  ???
+standard.exe                  ???
+standard.exe                   BasicLicenser::EndLongTransaction
+KERNEL32.DLL                   BaseThreadInitThunk           
+ntdll.dll                      RtlUserThreadStart            
+</Callstack>

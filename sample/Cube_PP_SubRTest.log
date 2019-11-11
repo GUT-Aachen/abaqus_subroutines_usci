@@ -1,0 +1,32 @@
+Analysis initiated from SIMULIA established products
+Abaqus JOB Cube_PP_SubRTest
+Abaqus 3DEXPERIENCE R2019x
+Abaqus License Manager checked out the following licenses:
+Abaqus/Standard checked out 5 tokens from Flexnet server license2.rz.rwth-aachen.de.
+<640 out of 1500 licenses remain available>.
+Begin Compiling Abaqus/Standard User Subroutines
+11/11/2019 11:02:45 AM
+Intel(R) Visual Fortran Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 18.0.2.185 Build 20180210
+Copyright (C) 1985-2018 Intel Corporation.  All rights reserved.
+
+End Compiling Abaqus/Standard User Subroutines
+Begin Linking Abaqus/Standard User Subroutines
+   Bibliothek "standardU.lib" und Objekt "standardU.exp" werden erstellt.
+End Linking Abaqus/Standard User Subroutines
+11/11/2019 11:02:46 AM
+Begin Analysis Input File Processor
+11/11/2019 11:02:46 AM
+Run pre.exe
+11/11/2019 11:02:49 AM
+End Analysis Input File Processor
+Begin Abaqus/Standard Analysis
+11/11/2019 11:02:49 AM
+Run standard.exe
+11/11/2019 11:03:08 AM
+End Abaqus/Standard Analysis
+Begin Convert MFS to SFS
+11/11/2019 11:03:09 AM
+Run SMASimUtility.exe
+11/11/2019 11:03:10 AM
+End Convert MFS to SFS
+Abaqus JOB Cube_PP_SubRTest COMPLETED

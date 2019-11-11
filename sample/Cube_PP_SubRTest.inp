@@ -7786,7 +7786,7 @@
    7699,          50.,          1.5
    7700,         49.5,           0.
    7701,          50.,          0.5
-*Element, type=CPE8RP
+*Element, type=CPE8P
   1,    1,   10,  298,  105, 2602, 2603, 2604, 2605
   2,   10,   11,  299,  298, 2606, 2607, 2608, 2603
   3,   11,   12,  300,  299, 2609, 2610, 2611, 2607
@@ -10485,6 +10485,8 @@ CDISP, CSTRESS, PFL
 *Output, history, variable=PRESELECT
 *EL FILE, frequency=10000
 COORD, VOIDR, POR
+*NODE FILE
+COORD
 *End Step
 ** ----------------------------------------------------------------
 ** 
@@ -10497,8 +10499,8 @@ COORD, VOIDR, POR
 ** BOUNDARY CONDITIONS
 ** 
 ** Name: BC_PP Type: Pore pressure
-*Boundary
-_PickedSet47_PP_, 8, 8, 1e+06
+*BOUNDARY,USER
+_PickedSet49_PP_, 8
 ** 
 ** OUTPUT REQUESTS
 ** 
