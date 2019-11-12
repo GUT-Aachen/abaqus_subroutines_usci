@@ -14,7 +14,9 @@
 !     until the end of the end of the analysis.
       subroutine uExternalDB( analysisPos, lRestart, 
 &							time, dTime, kStep, kInc )
+		!use, intrinsic :: iso_fortran_env, only: error_unit
 		include 'ABA_PARAM.INC'
+		
 
 		!	###############################		
 		!	Declare SUBROUTINE variables
@@ -28,6 +30,7 @@
 		!	###############################
 		integer, parameter :: outFileUnit = 113
 		integer, parameter :: matrixFileUnit = 114
+		integer, parameter :: porePressureFileUnit = 115
 
 		character(256) :: outDir
 		integer :: lenOutDir
@@ -43,6 +46,9 @@
 		
 		character(256) :: matrixFileName	! matrix file name
 		character(512) :: matrixFile		! matrix file path
+		
+		character(256) :: porePressureFileName	! pore pressure file name
+		character(512) :: porePressureFile		! pore pressure file path
 
 		!	###############################
 		!	USER PRE definitions
@@ -52,6 +58,7 @@
 		!	Set output filenames (CSV-Files)
 		fileOutName = trim(jobName) // '_void-ratio.csv'
 		matrixFileName = trim(jobName) // '_matrix.csv'
+		porePressureFileName = trim(jobName) // '_pore-pressure.csv'
 		
 		!	Create filepath + filename and save in fileOut/matrixFile.
 		!  As filepath	the actual Abaqus output directory will be used.
@@ -59,59 +66,83 @@
 		call getOutDir( outDir, lenOutDir )
 		fileOut = outDir(:lenOutDir) // '\' // fileOutName
 		matrixFile = outDir(:lenOutDir) // '\' // matrixFileName
-
+		porePressureFile = outDir(:lenOutDir) // '\' // porePressureFileName
 
 		isPosition: select case (analysisPos)
 		! #####################################
-		case (0) ! BEGINNING of ANALYSIS
-
-				! Opening a csv-file once to export void-ratio
-				open(unit=outFileUnit, file=fileOut, status='unknown', form='formatted')
-
-				! Check if the file was loaded succesfully
-				INQUIRE(outFileUnit, openED=ISopen)
-				if (ISopen) then
-						call stdb_AbqERR(1, 'Exportfile (%S) opened succesfully. '
-&                     //'If the analysis stops here, the file may be opened'
-&                     //'by another process!', 0, 0.0, fileOut)
-				else
-						call stdb_AbqERR(-2, 'Error opening the exportfile (%S).',
-&                     0, 0.0, fileOut)
-				end if
-				
-				! Opening a csv-file once to export matrix
-				open(unit=matrixFileUnit, file=matrixFile, status='unknown', form='formatted')
-
-				! Check if the file was loaded succesfully
-				INQUIRE(matrixFileUnit, openED=ISopen)
-				if (ISopen) then
-						call stdb_AbqERR(1, 'Matrixfile (%S) opened succesfully. '
-&                     //'If the analysis stops here, the file may be opened'
-&                     //'by another process!', 0, 0.0, matrixFile)
-				else
-						call stdb_AbqERR(-2, 'Error opening the matrixfile (%S).',
-&                     0, 0.0, matrixFile)
-				end if
-
-				! Get now()
-				call DATE_AND_time( cDummy, cDummy, cDummy, dateTime )
-
-!				! Write jobName into output file
-!				write(outFileUnit, '(A, A)') 'Abaqus Job-Name: ', TRIM(jobName)
-
+		! BEGINNING of ANALYSIS
 		! #####################################
-		case (3) ! END of ANALYSIS
+		case (0) 
+			
+			! Opening a csv-file once to export void-ratio
+			open(unit=outFileUnit, file=fileOut, status='unknown', form='formatted')
 
-				! Get now()
-				call DATE_AND_time( cDummy, cDummy, cDummy, dateTime )
+			! Check if the file was loaded succesfully
+			INQUIRE(outFileUnit, openED=ISopen)
+			if (ISopen) then
+					call stdb_AbqERR(1, 'Exportfile (%S) opened succesfully. '
+&                    //'If the analysis stops here, the file may be opened'
+&                    //'by another process!', 0, 0.0, fileOut)
+			else
+					call stdb_AbqERR(-2, 'Error opening the exportfile (%S).',
+&                    0, 0.0, fileOut)
+			end if
 				
-				!	Close output files
-				close(outFileUnit)
-				call stdb_AbqERR(1,'Exportfile (%S) closed.', 0, 0.0, fileOut)
-				
-				close(matrixFileUnit)
-				call stdb_AbqERR(1,'Matrixfile (%S) closed.', 0, 0.0, matrixFile)
+			! Opening a csv-file once to export matrix
+			open(unit=matrixFileUnit, file=matrixFile, status='unknown', form='formatted')
 
+			! Check if the file was loaded succesfully
+			INQUIRE(matrixFileUnit, openED=ISopen)
+			if (ISopen) then
+					call stdb_AbqERR(1, 'Matrixfile (%S) opened succesfully. '
+&                    //'If the analysis stops here, the file may be opened'
+&                    //'by another process!', 0, 0.0, matrixFile)
+			else
+					call stdb_AbqERR(-2, 'Error opening the matrixfile (%S).',
+&                    0, 0.0, matrixFile)
+			end if
+
+			! Get now()
+			call DATE_AND_time( cDummy, cDummy, cDummy, dateTime )
+
+!			! Write jobName into output file
+!			write(outFileUnit, '(A, A)') 'Abaqus Job-Name: ', TRIM(jobName)
+			
+			
+			! Reading pore-pressure-datafile
+			open (unit=porePressureFileUnit, action='read', 
+&						file=porePressureFile, iostat=ioError)
+
+			if (ioError /= 0) then
+				
+				call stdb_AbqERR(1,'Error reading pore pressure input file (%S). 
+&					Error: %I', ioError, 0.0, porePressureFile)		
+				stop
+			
+			else
+				call stdb_AbqERR(1,'Pore pressure input file (%S) opened successfully.',
+&							0, 0.0, porePressureFile)
+				
+			end if
+			
+		! #####################################
+		! END of ANALYSIS
+		! #####################################
+		case (3)
+
+			! Get now()
+			call DATE_AND_time( cDummy, cDummy, cDummy, dateTime )
+
+			!	Close output files
+			close(outFileUnit)
+			call stdb_AbqERR(1,'Exportfile (%S) closed.', 0, 0.0, fileOut)
+
+			close(matrixFileUnit)
+			call stdb_AbqERR(1,'Matrixfile (%S) closed.', 0, 0.0, matrixFile)
+			
+			close(porePressureFileUnit)
+			call stdb_AbqERR(1,'PorePressurefile (%S) closed.', 0, 0.0, porePressureFile)
+			
 		end select isPosition
 
 
@@ -160,25 +191,25 @@
 		! column in the data-output-file. Size of the array appends
 		! on the data to be stored.
 		! x, y, z, voidRatio, porePressure
-		double precision, dimension(4) :: writeBuffer =-999
+		real, dimension(5) :: writeBuffer =-999
 	
 		! Interpretation of double precision as integers
 		equivalence (dpArray(1), iArray(1,1))
 	
 		! Overwrite data in fil-file (result-file) in next increment
-		lOvrWrt = 1;
-	
+		lOvrWrt = 1;		
+		
 		! The command rewind always jumps back to the beginning of the output file. Thus
 		! only the last written increment is saved effectively.
 		rewind(outFileUnit)
 		rewind(matrixFileUnit)
 	
 		! Write headline in data output file
-		write(outFileUnit, '(A, "; ", A, "; ", A,"; ", A,"; ", A, ";")')
+		write(outFileUnit, '(A, ", ", A, ", ", A,", ", A,", ", A)')
 &                 'x', 'y', 'z', 'voidRatio', 'porePressure'
 
 		! Write headline in matrix file
-		write(matrixFileUnit, '(A, "; ", A, "; ", A,"; ", A, ";")')
+		write(matrixFileUnit, '(A, ", ", A, ", ", A,", ", A)')
 &                 'x', 'y', 'z', 'nodeNo'
 
 		call posFil( kStep, kInc, dpArray, jrdc)
@@ -209,7 +240,7 @@
 				case (6) ! VOIDRATIO of an ELEMENT
 					voidR = dpArray(3)			
 
-					writeBuffer(3) = voidR
+					writeBuffer(4) = voidR
 
 		
 				! #############################
@@ -218,16 +249,16 @@
 					coord_y = dpArray(4)
 					coord_z = dpArray(5)
 
-					writeBuffer(0) = coord_x
-					writeBuffer(1) = coord_y
-					writeBuffer(2) = coord_z
+					writeBuffer(1) = coord_x
+					writeBuffer(2) = coord_y
+					writeBuffer(3) = coord_z
 			
 
 				! #############################
 				case (18)! POREPRESSURE of an ELEMENT
 					porePressure = dpArray(3)
 				
-					writeBuffer(4) = porePressure
+					writeBuffer(5) = porePressure
 			
 
 				! #############################
@@ -239,22 +270,22 @@
 					coord_z = dpArray(6)
 				
 					! node, x, y, z
-					write(matrixFileUnit, '(I8, "; ", F9.3, "; ", F9.3, "; ",
-&								F9.3, ";")')
+					write(matrixFileUnit, '(I8, ", ", F9.3, ", ", F9.3, ", ",
+&								F9.3)')
 &								nodeNo, coord_x, coord_y, coord_z
 
 			end select isKey
-			
+				
 			! Check whether all data records have been collected.  If 
 			! yes, then the data is stored. 	
-			if (writeBuffer(0) /= -999 .and. writeBuffer(1) /= -999 .and. 
-&				writeBuffer(2) /= -999 .and. writeBuffer(3) /= -999 .and. 
-&				writeBuffer(4) /= -999) then
+			if (writeBuffer(1) /= -999 .and. writeBuffer(2) /= -999 .and. 
+&				writeBuffer(3) /= -999 .and. writeBuffer(4) /= -999 .and. 
+&				writeBuffer(5) /= -999) then
 				
 				! x, y, z, voidRatio, porePressure
-				write(outFileUnit, '(F9.3, "; ", F9.3, "; ", F9.3, "; ",
-&							F9.7, "; ", F12.2, ";")') writeBuffer(0),
-&							writeBuffer(1), writeBuffer(2), writeBuffer(3), writeBuffer(4)
+				write(outFileUnit, '(F9.3, ", ", F9.3, ", ", F9.3, ", ",
+&							F9.7, ", ", F12.2)') writeBuffer(1),
+&							writeBuffer(2), writeBuffer(3), writeBuffer(4), writeBuffer(5)
 			
 				! Reset the writebuffer
 				writeBuffer = -999
@@ -280,38 +311,62 @@
 	subroutine disp(u, kStep, kInc, time, node, noEl, jDof, coords)
 
 		include 'ABA_PARAM.INC'
-
+		
 		double precision, dimension(3) :: u, time, coords
 		integer :: jDof, kInc, noEl, node
+		
+		integer, parameter :: porePressureFileUnit = 115
+		real :: csvNode
+		double precision :: csvValue
+		real, dimension(3) :: csvCoords
+		
+		logical :: checkIfFound = 0
 
 		! Exit subroutine if dof is not pore pressure
 		! jDof == 8 :: pore pressure dof
 		! u(1) :: pore pressure value		
 		if ( jDof /= 8 ) return
-		
-		! Debug output in msg-file
-		call stdb_AbqERR(1,'Subroutine disp() has been executed. node: %I',
-&                 node, 0.0,' ')
-		call stdb_AbqERR(1,'Subroutine disp() has been executed. u(1): %R',
-&                 0, u,' ')
 
 		! Set pore pressure only on first increment
-		if ( kInc == 1 ) then
-			
+		if ( kInc == 1 ) then			
+			rewind(porePressureFileUnit)
+
 			! Find corresponding dataset in pore pressure data file
 			! Itterate through datafile
-			if (coord_x == coords(1) .and. 
-&					coord_y == coords(2) .and.
-&					coord_z == coords(3)) then
-			
-			! for EVERYROW:
-			! if (input.NODE == bc.NODE) then
-			!	u(1) = bc.POREPRESSURE
-			! end for
+			do
+				! Read lines from csv-files. As read_buffer is of type real only numeric data
+				! can be saved in this buffer. Otherwise an error will occure.
+				read (porePressureFileUnit, *, iostat=ioError)
+&							csvNode, csvCoords(1), csvCoords(2), csvCoords(3), csvValue
 
-			end if
+				! If ioError is smaler than 0 end of file is readched. If it is bigger 
+				! then 0 an error occured. Errors are ignored but logged
+				if (ioError < 0) then
+					exit ! Exit on EOF
+					
+				elseif (ioError == 0) then
+					if (csvNode == node) then
+						! write(*,*) 'Found pair:', csvNode, csvCoords(1), csvCoords(2), csvCoords(3), csvValue !Output data to console DEBUG
+						u(1) = csvValue ! Set pore pressure to boundary condition
+						checkIfFound = 1 ! Save success for later check
+						exit ! Exit on success
+					end if
+				else
+					call stdb_AbqERR(1,'Error reading data', 0, 0.0, '')
+					
+				end if
+					
+			end do
 			
-!			u(1) = 123456
+			! Check if pore pressure is set, otehrwise through an error.	
+			if (checkIfFound == 0) then
+				call stdb_AbqERR(-2,'No pore pressure set for node: %I',
+&						node, 0.0, ' ')	
+			! Only for debugging purposes
+!			else
+!				call stdb_AbqERR(1,'Pore pressure for node %I set to %R',
+!&						node, csvValue, ' ')	
+			end if
 			
 		end if
 		
